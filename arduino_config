@@ -1,0 +1,174 @@
+/* 
+Project: Tea machine.
+Author: Jonathan Prado
+Mail: jpradoar @ gmail dot com
+version: 1.0.11
+
+1. I configure the initial position.
+2. I wait until to cup is added
+3. I turn on the green led. After that I raise the lever. I wait a few seconds for human add hot water and a tea bag
+4. The green led blink much more fast when your time is finishing. Lets move on!!!
+5. I under the lever with the tea bag.
+6. And now magic's start. The Infusing the tea bag (up and down, up and down...).
+7. At finish, I go up halfway, wait a few seconds for drip. (Yes, always drop some drips)
+8. Wait a few seconds. I raise the lever to top level, and blink the green led while the buzzer sound.
+9. Is finished!. Your tea is ready, please, remove the cup and enjoy an almost automated tea
+
+*/
+
+// -------------------------- START DECLARE ------------------------
+#include <Servo.h>
+// create servo object to control a servo
+Servo myservo;  
+
+int ledred = 11;
+int ledgreen = 12;
+
+// max angle of the servo position
+int servo_max_angle = 70; 
+// min angle of the servo position
+int servo_min_angle = 60; 
+
+int flag_left = servo_max_angle + 3; 
+int flag_right = servo_min_angle - 0;
+
+int infusion_time_ms = 30;
+int count = 0;
+
+long distancia;
+long tiempo;
+// -------------------------- END DECLARE ------------------------
+
+// -------------------------- START SETUP ------------------------
+void setup(){
+  Serial.begin(9600);
+  // Trigg
+  pinMode(7, OUTPUT); 
+  // Echo
+  pinMode(6, INPUT); 
+  // led 11
+  pinMode(ledred, OUTPUT);
+  // led 12
+  pinMode(ledgreen, OUTPUT);
+  // Trigg
+  pinMode(4, OUTPUT); 
+  // attaches the servo on pin 9 to the servo object
+  myservo.attach(9);  
+}
+// -------------------------- END SETUP ------------------------
+
+// -------------------------- START function make_tea ------------------------
+void make_tea(){
+    // Up to add the tea
+    for(int x = 70; x < 150; x = x + 5){
+	    myservo.write(x);
+	    delay(300);
+    }
+    
+    // alarm waiting to add tea 
+    for(int x = 1; x < 21; x = x + 1){
+	    digitalWrite(ledgreen, HIGH);
+	    delay(300);
+	    digitalWrite(ledgreen, LOW);
+	    delay(300);  
+    }
+
+    digitalWrite(ledred, HIGH);
+
+    // Alarm to show run in few seconds 
+    for(int x = 1; x < 15; x = x + 1){
+	    digitalWrite(ledgreen, HIGH);
+	    delay(100);
+	    digitalWrite(ledgreen, LOW);
+	    delay(100);  
+    }
+
+    delay(1000);
+    
+    // Down to build the tea
+    for(int x = 150; x > 70; x = x - 5){
+       myservo.write(x);
+       delay(300);
+    }
+
+    delay(400);
+  
+    //Infusing the tea bag
+    delay(400);
+    myservo.write(servo_min_angle);
+    delay(infusion_time_ms);
+    myservo.write(servo_max_angle);
+    delay(400);
+    digitalWrite(ledred, HIGH);
+
+
+    //shaking the tea bag
+    for (count = 1; count <= 25; count += 1) {
+      digitalWrite(ledred, LOW);
+      delay(300);
+      myservo.write(flag_right); 
+      delay(300);      
+      myservo.write(flag_left); 
+      if ((count % 5) == 0 ) {
+          delay(2000);                  
+      }
+    }
+
+    // Up to add the tea
+    for(int x = 70; x < 110; x = x + 5){
+      myservo.write(x);
+      delay(300);
+    }
+    delay(5000);
+    
+    // Up to add the tea
+    for(int x = 110; x < 150; x = x + 5){
+      myservo.write(x);
+      delay(300);
+    }
+    delay(3000);
+    digitalWrite(ledred, LOW);
+
+    // alarm waiting to add tea 
+    for(int x = 1; x < 30; x = x + 1){
+      digitalWrite(ledgreen, HIGH);
+      digitalWrite(4, HIGH);
+      delay(200);
+      digitalWrite(ledgreen, LOW);
+      digitalWrite(4, LOW);
+      delay(200);  
+    }
+
+    //wait until you unplug the machine
+    delay(16000);
+    digitalWrite(ledgreen, HIGH);
+    Serial.println(" Tea finished, please, remove the cup ");
+}
+
+// -------------------------- END function make_tea ------------------------
+
+// -------------------------- START LOOP ------------------------
+void loop(){
+  digitalWrite(7,LOW); 
+  delayMicroseconds(5);
+  // Envia pulso ultrasónico
+  digitalWrite(7, HIGH); 
+  delayMicroseconds(10);
+  // Mide el tiempo que tarda en regresar una onda ultrasónico de Echo a Trigg
+  tiempo=pulseIn(6, HIGH); 
+  // Calcula la distancia (en cm) con la formula Distancia = Velocidad * Tiempo
+  distancia= int(0.017*tiempo); 
+  Serial.print(distancia);
+  Serial.println(" cm ");
+  delay(500);
+  // distancia > 5 ya que cuando enciende el sistema la distancia es NULL/0
+  if(distancia > 5 and distancia < 20 ){
+    // turn on led to enable tea process
+    digitalWrite(12,HIGH); 
+    make_tea();
+  }
+  else{
+    digitalWrite(12,LOW);
+  }
+}
+// -------------------------- END LOOP AND ALL ------------------------
