@@ -35,5 +35,16 @@ Tea machine with arduino
 <hr>
 
 ### Conections
-
 [Pending...]
+
+
+
+### Blueprints
+[Pending...]
+
+
+
+
+### Video
+
+[![Watch the video](https://github.com/jpradoar/tea_machine/blob/master/img.png)](https://www.youtube.com/watch?v=hY6Wf2S_Gdg&feature=youtu.be)
