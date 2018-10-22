@@ -40,7 +40,7 @@ Tea machine with arduino
 
 
 ### Blueprints
-[Pending...]
+<img src="blueprints.jpeg" height="400" width="320" />
 
 
 
